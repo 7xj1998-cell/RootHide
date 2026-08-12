@@ -83,10 +83,6 @@ int sysctlbyname_hook(const char *name, void *oldp, size_t *oldlenp, void *newp,
 
 __attribute__((constructor)) static void initializer(void)
 {
-	// DEBUG A/B: disable all launchdhook initialization while preserving
-	// the injected image and opainject handoff path.
-	return;
-
 	crashreporter_start();
 
 /********** roothide specfic ********/
@@ -144,6 +140,10 @@ __attribute__((constructor)) static void initializer(void)
 		abort_with_reason(7, 1, msg, 0);
 		return;
 	}
+
+	// DEBUG A/B: preserve primitive recovery and boomerang handoff, but
+	// skip all launchd hook registration and post-initialization logic.
+	return;
 
 	if (jbupdatePrevVersion && jbupdateNewVersion) {
 		jbupdate_finalize_stage2(jbupdatePrevVersion, jbupdateNewVersion);
