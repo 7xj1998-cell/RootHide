@@ -83,6 +83,10 @@ int sysctlbyname_hook(const char *name, void *oldp, size_t *oldlenp, void *newp,
 
 __attribute__((constructor)) static void initializer(void)
 {
+	// DEBUG A/B: disable all launchdhook initialization while preserving
+	// the injected image and opainject handoff path.
+	return;
+
 	crashreporter_start();
 
 /********** roothide specfic ********/
@@ -190,3 +194,4 @@ __attribute__((constructor)) static void initializer(void)
 roothide_launchd_postinit(firstLoad);
 /********** roothide specfic ********/
 }
+
