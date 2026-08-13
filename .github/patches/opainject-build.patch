@@ -352,7 +352,7 @@ index 5339972..58784c6 100644
  	}
  
  	if(stateOut)
-@@ -212,5 +231,5 @@ void printThreadInfo(thread_act_t thread)
+@@ -212,4 +231,4 @@ void printThreadInfo(thread_act_t thread)
  
  	printf("system_time: %d.%d\n", basicInfo.system_time.seconds, basicInfo.system_time.microseconds);
  	printf("user_time: %d.%d\n", basicInfo.user_time.seconds, basicInfo.user_time.microseconds);
