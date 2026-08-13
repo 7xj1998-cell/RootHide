@@ -152,7 +152,7 @@ index 77acb84..f125a72 100644
  		}
  
 @@ -325,31 +351,27 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
- 		printf("[arbCall] pthread successfully did not return with code %d (%s)\n", kr, mach_error_string(kr));
+ 	printf("[arbCall] pthread successfully did not return with code %d (%s)\n", kr, mach_error_string(kr));
  	}
  
 -	resume_threads_except_for(cachedThreads, cachedThreadCount, targetThread);
@@ -199,9 +199,9 @@ index 77acb84..f125a72 100644
 -		//printThreadState(targetThread);
 -		thread_resume(targetThread);
 -	}
+ 
  	return kr;
  }
-
 @@ -364,33 +375,37 @@ void prepareForMagic(task_t task, vm_address_t allImageInfoAddr)
  	printf("[prepareForMagic] done, ropLoop: 0x%llX\n", ropLoop);
  }
