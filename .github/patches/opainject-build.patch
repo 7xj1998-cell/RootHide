@@ -136,8 +136,10 @@ index 77acb84..f125a72 100644
  	printf("[arbCall] Started thread, waiting for it to finish...\n");
  
  	// wait for arbitary call to finish (or not)
-@@ -310,4 +324,12 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
+@@ -310,6 +324,12 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  		{
+-			free(origThreadFullState);
+-			printf("[arbCall] ERROR: failed to wait for thread to finish: %s\n", mach_error_string(kr));
 +			// All failures must restore the hijacked target thread before return.
 +			thread_suspend(targetThread);
 +			thread_abort(targetThread);
@@ -352,7 +354,7 @@ index 5339972..58784c6 100644
  	}
  
  	if(stateOut)
-@@ -212,4 +231,4 @@ void printThreadInfo(thread_act_t thread)
+@@ -212,5 +231,5 @@ void printThreadInfo(thread_act_t thread)
  
  	printf("system_time: %d.%d\n", basicInfo.system_time.seconds, basicInfo.system_time.microseconds);
  	printf("user_time: %d.%d\n", basicInfo.user_time.seconds, basicInfo.user_time.microseconds);
