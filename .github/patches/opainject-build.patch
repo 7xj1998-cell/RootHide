@@ -151,7 +151,7 @@ index 77acb84..f125a72 100644
  			return kr;
  		}
  
-@@ -325,10 +351,6 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
+@@ -325,31 +351,27 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  		printf("[arbCall] pthread successfully did not return with code %d (%s)\n", kr, mach_error_string(kr));
  	}
  
@@ -159,8 +159,46 @@ index 77acb84..f125a72 100644
 -
 -	vm_deallocate(mach_task_self(), (vm_offset_t)cachedThreads, sizeof(thread_act_array_t) * cachedThreadCount);
 -
++	if (willReturn)
++	{
++		// suspend target thread
++		thread_suspend(targetThread);
++		thread_abort(targetThread);
++
++		// restore states of target thread to what they were before the arbitary call
++		bool restoreSuccess = thread_restore_state_arm64(targetThread, origThreadFullState);
++		if(!restoreSuccess)
++		{
++			printf("[arbCall] ERROR: failed to revert to old thread state\n");
++			return kr;
++		}
++
++		// resume thread again, process should continue executing as before
++		//printThreadState(targetThread);
++		thread_resume(targetThread);
++	}
++
  	// release fake stack as it's no longer needed
  	vm_deallocate(task, remoteStack, STACK_SIZE);
+-
+-	if (willReturn)
+-	{
+-		// suspend target thread
+-		thread_suspend(targetThread);
+-		thread_abort(targetThread);
+-
+-		// restore states of target thread to what they were before the arbitary call
+-		bool restoreSuccess = thread_restore_state_arm64(targetThread, origThreadFullState);
+-		if(!restoreSuccess)
+-		{
+-			printf("[arbCall] ERROR: failed to revert to old thread state\n");
+-			return kr;
+-		}
+-
+-		// resume thread again, process should continue executing as before
+-		//printThreadState(targetThread);
+-		thread_resume(targetThread);
+-	}
  
 @@ -364,33 +375,37 @@ void prepareForMagic(task_t task, vm_address_t allImageInfoAddr)
  	printf("[prepareForMagic] done, ropLoop: 0x%llX\n", ropLoop);
