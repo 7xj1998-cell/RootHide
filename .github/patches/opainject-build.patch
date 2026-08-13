@@ -108,7 +108,7 @@ diff --git a/rop_inject.m b/rop_inject.m
 index 77acb84..f125a72 100644
 --- a/rop_inject.m
 +++ b/rop_inject.m
-@@ -293,12 +293,22 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
+@@ -293,12 +293,26 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  	thread_act_array_t cachedThreads;
  	mach_msg_type_number_t cachedThreadCount;
  	kr = task_threads(task, &cachedThreads, &cachedThreadCount);
@@ -136,7 +136,7 @@ index 77acb84..f125a72 100644
  	printf("[arbCall] Started thread, waiting for it to finish...\n");
  
  	// wait for arbitary call to finish (or not)
-@@ -310,6 +320,11 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
+@@ -310,6 +324,18 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  		{
 +			if (kr != KERN_OPERATION_TIMED_OUT) {
 +				// All non-timeout errors must restore the hijacked target thread.
@@ -155,7 +155,7 @@ index 77acb84..f125a72 100644
  			return kr;
  		}
  
-@@ -325,10 +340,6 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
+@@ -325,10 +351,6 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  		printf("[arbCall] pthread successfully did not return with code %d (%s)\n", kr, mach_error_string(kr));
  	}
  
