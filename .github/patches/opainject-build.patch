@@ -148,7 +148,7 @@ index 77acb84..f125a72 100644
 +			printf("[arbCall] ERROR: failed to wait for thread to finish: %s\n", mach_error_string(kr));
  			return kr;
  		}
-
+ 
 @@ -325,10 +351,6 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  		printf("[arbCall] pthread successfully did not return with code %d (%s)\n", kr, mach_error_string(kr));
  	}
