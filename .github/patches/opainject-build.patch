@@ -145,11 +145,10 @@ index 77acb84..f125a72 100644
 +			origThreadFullState = NULL; // thread_restore_state_arm64 consumes it
 +			vm_deallocate(task, remoteStack, STACK_SIZE);
 +			thread_resume(targetThread);
-+			origThreadFullState = NULL; // thread_restore_state_arm64 consumes it
- 			printf("[arbCall] ERROR: failed to wait for thread to finish: %s\n", mach_error_string(kr));
-  			return kr;
++			printf("[arbCall] ERROR: failed to wait for thread to finish: %s\n", mach_error_string(kr));
+ 			return kr;
  		}
- 
+
 @@ -325,10 +351,6 @@ kern_return_t arbCall(task_t task, thread_act_t targetThread, uint64_t* retOut,
  		printf("[arbCall] pthread successfully did not return with code %d (%s)\n", kr, mach_error_string(kr));
  	}
@@ -218,7 +217,7 @@ index 77acb84..f125a72 100644
 -			arbCall(task, pthread, (uint64_t*)&executableExtensionRet, true, sandbox_extension_consumeAddr, 1, remoteExtString);
 -			vm_deallocate(task, remoteExtString, remoteExtStringSize);
 +			kern_return_t kr = arbCall(task, pthread, (uint64_t*)&executableExtensionRet, true, sandbox_extension_consumeAddr, 1, remoteExtString);
-+			if (kr != KERN_OPERATION_TIMED_OUT) vm_deallocate(task, remoteExtString, remoteExtStringSize);
++			vm_deallocate(task, remoteExtString, remoteExtStringSize);
 +			if (kr != KERN_SUCCESS) { thread_terminate(pthread); return kr; }
  
  			printf("[sandboxFixup] sandbox_extension_consume returned %lld for executable extension\n", (int64_t)executableExtensionRet);
@@ -275,7 +274,7 @@ index 77acb84..f125a72 100644
 +		void* dlopenRet = NULL;
 +		kr = arbCall(task, pthread, (uint64_t*)&dlopenRet, true, dlopenAddr, 2, remoteDylibPath, RTLD_NOW);
 +		vm_deallocate(task, remoteDylibPath, remoteDylibPathSize);
-+		if (kr != KERN_SUCCESS) { thread_terminate(pthread); return kr; }
++		if (kr != KERN_SUCCESS) return kr;
  
  		if (dlopenRet) {
  			printf("[injectDylibViaRop] dlopen succeeded, library handle: %p\n", dlopenRet);
@@ -284,7 +283,7 @@ index 77acb84..f125a72 100644
  			uint64_t remoteErrorString = 0;
 -			arbCall(task, pthread, (uint64_t*)&remoteErrorString, true, dlerrorAddr, 0);
 +			kr = arbCall(task, pthread, (uint64_t*)&remoteErrorString, true, dlerrorAddr, 0);
-+			if (kr != KERN_SUCCESS) return kr;
++			if (kr != KERN_SUCCESS) { thread_terminate(pthread); return kr; }
  			char *errorString = task_copy_string(task, remoteErrorString);
  			printf("[injectDylibViaRop] dlopen failed, error:\n%s\n", errorString);
  			free(errorString);
