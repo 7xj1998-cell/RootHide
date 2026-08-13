@@ -199,7 +199,9 @@ index 77acb84..f125a72 100644
 -		//printThreadState(targetThread);
 -		thread_resume(targetThread);
 -	}
- 
+ `treturn kr;
+ }
+
 @@ -364,33 +375,37 @@ void prepareForMagic(task_t task, vm_address_t allImageInfoAddr)
  	printf("[prepareForMagic] done, ropLoop: 0x%llX\n", ropLoop);
  }
