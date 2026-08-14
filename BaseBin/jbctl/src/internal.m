@@ -166,27 +166,27 @@ int jbctl_handle_internal(const char *command, int argc, char* argv[])
 
 		printf("Port to stash: %u\n", selfInitPorts[2]);
 
-		mach_port_t launchdTaskPort;
-		if (task_for_pid(mach_task_self(), 1, &launchdTaskPort) != 0) {
-			printf("task_for_pid on launchd failed\n");
+		mach_port_t launchdTaskPort = MACH_PORT_NULL;
+		kern_return_t kr = task_for_pid(mach_task_self(), 1, &launchdTaskPort);
+		if (kr != KERN_SUCCESS || !MACH_PORT_VALID(launchdTaskPort)) {
+			printf("task_for_pid on launchd failed: %d\n", kr);
 			return -1;
 		}
-		mach_port_t *launchdInitPorts = NULL;
-		mach_msg_type_number_t launchdInitPortsCount = 0;
-		if (mach_ports_lookup(launchdTaskPort, &launchdInitPorts, &launchdInitPortsCount) != 0) {
-			printf("mach_ports_lookup on launchd failed\n");
-			return -1;
-		}
-		if (launchdInitPortsCount < 3) {
-			printf("ERROR: Unexpected initports count on launchd\n");
-			return -1;
-		}
-		launchdInitPorts[2] = selfInitPorts[2]; // Transfer port to launchd
-		if (mach_ports_register(launchdTaskPort, launchdInitPorts, launchdInitPortsCount) != 0) {
-			printf("ERROR: Failed stashing port into launchd\n");
-			return -1;
-		}
+
+		// Do not read/modify launchd's returned init-port array here. On some
+		// iOS 17.6 launchd states that path can fault inside jbctl. Register the
+		// three-port layout directly, matching the working boomerang path.
+		mach_port_t portsToRegister[3] = {
+			MACH_PORT_NULL,
+			MACH_PORT_NULL,
+			selfInitPorts[2]
+		};
+		kr = mach_ports_register(launchdTaskPort, portsToRegister, 3);
 		mach_port_deallocate(mach_task_self(), launchdTaskPort);
+		if (kr != KERN_SUCCESS) {
+			printf("ERROR: Failed stashing port into launchd: %d\n", kr);
+			return -1;
+		}
 		return 0;
 	}
 /*
