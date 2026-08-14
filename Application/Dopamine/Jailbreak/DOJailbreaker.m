@@ -381,10 +381,8 @@ void *boomerang_server(struct boomerang_info *info)
         if (xdict) {
             if (jbserver_received_boomerang_xpc_message(&gBoomerangServer, xdict) == JBS_BOOMERANG_DONE) {
                 dispatch_semaphore_signal(info->boomerangDone);
-                xpc_release(xdict);
                 break;
             }
-            xpc_release(xdict);
         }
     }
     return NULL;
