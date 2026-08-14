@@ -137,13 +137,12 @@ __attribute__((constructor)) static void initializer(void)
 	if (err != 0) {
 		char msg[1000];
 		snprintf(msg, 1000, "Dopamine: Failed to recover primitives (error %d), cannot continue.", err);
-		abort_with_reason(7, 1, msg, 0);
+		// launchd is PID 1. Never terminate it because the handoff failed:
+		// doing so makes the kernel panic with "initproc exited" and reboots
+		// the device. Leave launchd untouched and report the failed attempt.
+		fprintf(stderr, "%s\n", msg);
 		return;
 	}
-
-	// DEBUG A/B: preserve primitive recovery and boomerang handoff, but
-	// skip all launchd hook registration and post-initialization logic.
-	return;
 
 	if (jbupdatePrevVersion && jbupdateNewVersion) {
 		jbupdate_finalize_stage2(jbupdatePrevVersion, jbupdateNewVersion);
