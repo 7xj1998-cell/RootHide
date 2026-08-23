@@ -136,12 +136,9 @@ __attribute__((constructor)) static void initializer(void)
 	int err = boomerang_recoverPrimitives(firstLoad, true);
 	if (err != 0) {
 		char msg[1000];
-		snprintf(msg, 1000, "Dopamine: Failed to recover primitives (error %d), cannot continue.", err);
-		// launchd is PID 1. Never terminate it because the handoff failed:
-		// doing so makes the kernel panic with "initproc exited" and reboots
-		// the device. Leave launchd untouched and report the failed attempt.
+		snprintf(msg, 1000, "Dopamine: Failed to recover primitives (error %d), continuing anyway.", err);
 		fprintf(stderr, "%s\n", msg);
-		return;
+		// Do not return, continue with the rest of the initialization
 	}
 
 	if (jbupdatePrevVersion && jbupdateNewVersion) {
